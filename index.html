@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SportSync - Sports Management Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .brick-wall {
+            background: linear-gradient(rgba(84, 131, 153, 0.9), rgba(84, 131, 153, 0.9)),
+                        repeating-linear-gradient(
+                            45deg,
+                            #548399 0px,
+                            #548399 2px,
+                            transparent 2px,
+                            transparent 4px
+                        );
+            position: relative;
+        }
+
+        .brick {
+            width: 100px;
+            height: 40px;
+            background-color: #548399;
+            margin: 5px;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .brick::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0.1) 0%,
+                rgba(0,0,0,0.1) 100%
+            );
+        }
+
+        .row:nth-child(even) {
+            transform: translateX(50px);
+        }
+
+        .notification {
+            animation: slideIn 0.5s ease-out;
+            transform-origin: top right;
+        }
+
+        @keyframes slideIn {
+            0% {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .sport-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .nav-link {
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: #548399;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <div class="brick-wall h-10 w-10 rounded-lg mr-2"></div>
+                    <span class="font-bold text-xl text-gray-800">SportSync</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#" class="nav-link text-gray-700 font-medium hover:text-gray-900">Home</a>
+                    <a href="#sports" class="nav-link text-gray-700 font-medium hover:text-gray-900">Sports</a>
+                    <a href="#events" class="nav-link text-gray-700 font-medium hover:text-gray-900">Events</a>
+                    <a href="#enrollment" class="nav-link text-gray-700 font-medium hover:text-gray-900">Enrollment</a>
+                    <a href="#contact" class="nav-link text-gray-700 font-medium hover:text-gray-900">Contact</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="notificationBtn" class="relative text-gray-700 hover:text-gray-900">
+                        <i class="bi bi-bell text-xl"></i>
+                        <span id="notification-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">3</span>
+                    </button>
+                    <button class="bg-[#548399] hover:bg-[#3f6375] text-white font-medium py-2 px-4 rounded-lg transition duration-300">
+                        Sign In
+                    </button>
+                </div>
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-button" class="text-gray-500 hover:text-gray-900 focus:outline-none">
+                        <i class="bi bi-list text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Mobile menu -->
+            <div id="mobile-menu" class="hidden md:hidden mt-4">
+                <div class="flex flex-col space-y-4 py-3">
+                    <a href="#" class="text-gray-700 font-medium hover:text-gray-900">Home</a>
+                    <a href="#sports" class="text-gray-700 font-medium hover:text-gray-900">Sports</a>
+                    <a href="#events" class="text-gray-700 font-medium hover:text-gray-900">Events</a>
+                    <a href="#enrollment" class="text-gray-700 font-medium hover:text-gray-900">Enrollment</a>
+                    <a href="#contact" class="text-gray-700 font-medium hover:text-gray-900">Contact</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Notification Panel -->
+    <div id="notification-panel" class="hidden fixed right-4 top-16 w-80 bg-white shadow-xl rounded-lg z-50 overflow-hidden">
+        <div class="bg-[#548399] text-white py-2 px-4 font-medium flex justify-between items-center">
+            <span>Notifications</span>
+            <button id="close-notifications" class="text-white hover:text-gray-200">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="divide-y divide-gray-200">
+            <div class="notification p-4 hover:bg-gray-50">
+                <div class="flex items-start">
+                    <div class="bg-blue-100 text-blue-500 rounded-full p-2 mr-3">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-800">Basketball Tournament</p>
+                        <p class="text-sm text-gray-600">Registration closes in 2 days</p>
+                        <p class="text-xs text-gray-500 mt-1">10 minutes ago</p>
+                    </div>
+                </div>
+            </div>
+            <div class="notification p-4 hover:bg-gray-50">
+                <div class="flex items-start">
+                    <div class="bg-green-100 text-green-500 rounded-full p-2 mr-3">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-800">Swimming Enrollment Confirmed</p>
+                        <p class="text-sm text-gray-600">Your registration has been approved</p>
+                        <p class="text-xs text-gray-500 mt-1">2 hours ago</p>
+                    </div>
+                </div>
+            </div>
+            <div class="notification p-4 hover:bg-gray-50">
+                <div class="flex items-start">
+                    <div class="bg-yellow-100 text-yellow-500 rounded-full p-2 mr-3">
+                        <i class="bi bi-lightning"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-800">New Football Training</p>
+                        <p class="text-sm text-gray-600">A new training session is available</p>
+                        <p class="text-xs text-gray-500 mt-1">Yesterday</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="p-3 bg-gray-50 text-center">
+            <a href="#" class="text-sm text-[#548399] hover:text-[#3f6375] font-medium">View all notifications</a>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="brick-wall py-16 px-4 md:px-8">
+        <div class="container mx-auto max-w-6xl">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-8 md:mb-0">
+                    <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+                        Manage Your Sporting Journey with Ease
+                    </h1>
+                    <p class="text-white text-lg mb-6 opacity-90">
+                        Enroll in sports events, get timely notifications, and track your progress all in one place.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="#enrollment" class="bg-white text-[#548399] font-bold py-3 px-6 rounded-lg hover:bg-gray-100 transition duration-300 text-center">
+                            Enroll Now
+                        </a>
+                        <a href="#sports" class="bg-transparent border-2 border-white text-white font-bold py-3 px-6 rounded-lg hover:bg-white/10 transition duration-300 text-center">
+                            Explore Sports
+                        </a>
+                    </div>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                    <div class="relative">
+                        <div id="brick-animation" class="w-full h-64 md:h-80 rounded-lg overflow-hidden">
+                            <!-- Brick pattern will be here -->
+                        </div>
+                        <img src="https://images.unsplash.com/photo-1552674605-db6ffd4facb5" alt="Sports Management" class="absolute inset-0 w-full h-full object-cover rounded-lg opacity-80">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="py-16 px-4 bg-white">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Why Choose SportSync?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="p-6 bg-gray-50 rounded-lg">
+                    <div class="bg-[#548399] w-14 h-14 rounded-full flex items-center justify-center mb-4">
+                        <i class="bi bi-calendar2-check text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Easy Enrollment</h3>
+                    <p class="text-gray-600">Seamlessly enroll in any sports or events with just a few clicks. No paperwork required.</p>
+                </div>
+                <div class="p-6 bg-gray-50 rounded-lg">
+                    <div class="bg-[#548399] w-14 h-14 rounded-full flex items-center justify-center mb-4">
+                        <i class="bi bi-bell text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Real-time Notifications</h3>
+                    <p class="text-gray-600">Stay updated with instant notifications about your enrollments, events, and important deadlines.</p>
+                </div>
+                <div class="p-6 bg-gray-50 rounded-lg">
+                    <div class="bg-[#548399] w-14 h-14 rounded-full flex items-center justify-center mb-4">
+                        <i class="bi bi-graph-up text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Performance Tracking</h3>
+                    <p class="text-gray-600">Track your progress, achievements, and statistics across all of your sporting activities.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sports Section -->
+    <div id="sports" class="py-16 px-4 bg-gray-100">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-4">Available Sports</h2>
+            <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+                Explore our wide range of sports programs and find the perfect fit for your interests and skill level.
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="sport-card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
+                    <img src="https://images.unsplash.com/photo-1546519638-68e109acd27d" alt="Basketball" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Basketball</h3>
+                        <p class="text-gray-600 mb-4">Join our basketball programs for all skill levels, from beginners to advanced players.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium bg-green-100 text-green-800 py-1 px-2 rounded">Enrolling Now</span>
+                            <a href="#enrollment" class="text-[#548399] hover:text-[#3f6375] font-medium">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="sport-card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
+                    <img src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55" alt="Swimming" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Swimming</h3>
+                        <p class="text-gray-600 mb-4">Learn swimming techniques, improve your skills, or train for competitions with our certified coaches.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium bg-green-100 text-green-800 py-1 px-2 rounded">Enrolling Now</span>
+                            <a href="#enrollment" class="text-[#548399] hover:text-[#3f6375] font-medium">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="sport-card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
+                    <img src="https://images.unsplash.com/photo-1517466787929-bc90951d0974" alt="Football" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Football</h3>
+                        <p class="text-gray-600 mb-4">Join our football teams and programs for all ages. Focus on skills, tactics, and teamwork.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium bg-yellow-100 text-yellow-800 py-1 px-2 rounded">Limited Spots</span>
+                            <a href="#enrollment" class="text-[#548399] hover:text-[#3f6375] font-medium">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="sport-card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
+                    <img src="https://images.unsplash.com/photo-1534158914592-062992fbe900" alt="Tennis" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Tennis</h3>
+                        <p class="text-gray-600 mb-4">Learn tennis fundamentals or improve your game with our professional tennis programs.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium bg-green-100 text-green-800 py-1 px-2 rounded">Enrolling Now</span>
+                            <a href="#enrollment" class="text-[#548399] hover:text-[#3f6375] font-medium">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="sport-card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
+                    <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018" alt="Volleyball" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Volleyball</h3>
+                        <p class="text-gray-600 mb-4">Join our volleyball teams and develop your skills, technique, and teamwork abilities.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium bg-red-100 text-red-800 py-1 px-2 rounded">Full</span>
+                            <a href="#enrollment" class="text-[#548399] hover:text-[#3f6375] font-medium">Join Waitlist</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="sport-card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
+                    <img src="https://images.unsplash.com/photo-1565992441121-4367c2967103" alt="Track and Field" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Track and Field</h3>
+                        <p class="text-gray-600 mb-4">Develop your speed, strength, and endurance with our comprehensive track and field programs.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium bg-green-100 text-green-800 py-1 px-2 rounded">Enrolling Now</span>
+                            <a href="#enrollment" class="text-[#548399] hover:text-[#3f6375] font-medium">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Events Section -->
+    <div id="events" class="py-16 px-4 bg-white">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-4">Upcoming Events</h2>
+            <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+                Don't miss our exciting events and tournaments. Register now to secure your spot!
+            </p>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white shadow-md rounded-lg">
+                    <thead>
+                        <tr class="bg-[#548399] text-white">
+                            <th class="py-4 px-6 text-left">Event Name</th>
+                            <th class="py-4 px-6 text-left">Date</th>
+                            <th class="py-4 px-6 text-left">Location</th>
+                            <th class="py-4 px-6 text-left">Status</th>
+                            <th class="py-4 px-6 text-left">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-4 px-6">Summer Basketball Tournament</td>
+                            <td class="py-4 px-6">July 15-20, 2023</td>
+                            <td class="py-4 px-6">City Sports Complex</td>
+                            <td class="py-4 px-6">
+                                <span class="text-sm font-medium bg-green-100 text-green-800 py-1 px-2 rounded">Registering</span>
+                            </td>
+                            <td class="py-4 px-6">
+                                <a href="#enrollment" class="text-[#548399] hover:text-[#3f6375] font-medium">Register</a>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-4 px-6">Swim Meet Championship</td>
+                            <td class="py-4 px-6">August 5-6, 2023</td>
+                            <td class="py-4 px-6">Aquatic Center</td>
+                            <td class="py-4 px-6">
+                                <span class="text-sm font-medium bg-yellow-100 text-yellow-800 py-1 px-2 rounded">Few Spots Left</span>
+                            </td>
+                            <td class="py-4 px-6">
+                                <a href="#enrollment" class="text-[#548399] hover:text-[#3f6375] font-medium">Register</a>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-4 px-6">Youth Football League</td>
+                            <td class="py-4 px-6">September 10 - November 15, 2023</td>
+                            <td class="py-4 px-6">Memorial Stadium</td>
+                            <td class="py-4 px-6">
+                                <span class="text-sm font-medium bg-green-100 text-green-800 py-1 px-2 rounded">Registering</span>
+                            </td>
+                            <td class="py-4 px-6">
+                                <a href="#enrollment" class="text-[#548399] hover:text-[#3f6375] font-medium">Register</a>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-4 px-6">Tennis Open Tournament</td>
+                            <td class="py-4 px-6">August 12-14, 2023</td>
+                            <td class="py-4 px-6">Central Tennis Club</td>
+                            <td class="py-4 px-6">
+                                <span class="text-sm font-medium bg-red-100 text-red-800 py-1 px-2 rounded">Full</span>
+                            </td>
+                            <td class="py-4 px-6">
+                                <a href="#" class="text-[#548399] hover:text-[#3f6375] font-medium">Join Waitlist</a>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-4 px-6">Marathon Run</td>
+                            <td class="py-4 px-6">October 8, 2023</td>
+                            <td class="py-4 px-6">Downtown</td>
+                            <td class="py-4 px-6">
+                                <span class="text-sm font-medium bg-green-100 text-green-800 py-1 px-2 rounded">Registering</span>
+                            </td>
+                            <td class="py-4 px-6">
+                                <a href="#enrollment" class="text-[#548399] hover:text-[#3f6375] font-medium">Register</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enrollment Section -->
+    <div id="enrollment" class="py-16 px-4 bg-gray-100">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-4">Enroll Now</h2>
+            <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+                Fill out the form below to enroll in any of our sports programs or events. We'll notify you of your enrollment status.
+            </p>
+            <div class="bg-white rounded-lg shadow-md p-8">
+                <form id="enrollment-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="col-span-1">
+                        <label for="full-name" class="block text-gray-700 font-medium mb-2">Full Name</label>
+                        <input type="text" id="full-name" name="full-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#548399] focus:border-[#548399] outline-none" required>
+                    </div>
+                    <div class="col-span-1">
+                        <label for="email" class="block text-gray-700 font-medium mb-2">Email Address</label>
+                        <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#548399] focus:border-[#548399] outline-none" required>
+                    </div>
+                    <div class="col-span-1">
+                        <label for="phone" class="block text-gray-700 font-medium mb-2">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#548399] focus:border-[#548399] outline-none" required>
+                    </div>
+                    <div class="col-span-1">
+                        <label for="age" class="block text-gray-700 font-medium mb-2">Age</label>
+                        <input type="number" id="age" name="age" min="5" max="100" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#548399] focus:border-[#548399] outline-none" required>
+                    </div>
+                    <div class="col-span-2">
+                        <label for="sport" class="block text-gray-700 font-medium mb-2">Select Sport/Program</label>
+                        <select id="sport" name="sport" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#548399] focus:border-[#548399] outline-none" required>
+                            <option value="" disabled selected>Choose a sport or program</option>
+                            <option value="basketball">Basketball</option>
+                            <option value="swimming">Swimming</option>
+                            <option value="football">Football</option>
+                            <option value="tennis">Tennis</option>
+                            <option value="volleyball">Volleyball</option>
+                            <option value="track">Track and Field</option>
+                        </select>
+                    </div>
+                    <div class="col-span-2">
+                        <label for="event" class="block text-gray-700 font-medium mb-2">Select Event (Optional)</label>
+                        <select id="event" name="event" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#548399] focus:border-[#548399] outline-none">
+                            <option value="" disabled selected>Choose an event (if applicable)</option>
+                            <option value="basketball-tournament">Summer Basketball Tournament</option>
+                            <option value="swim-meet">Swim Meet Championship</option>
+                            <option value="football-league">Youth Football League</option>
+                            <option value="tennis-tournament">Tennis Open Tournament</option>
+                            <option value="marathon">Marathon Run</option>
+                        </select>
+                    </div>
+                    <div class="col-span-2">
+                        <label for="experience" class="block text-gray-700 font-medium mb-2">Experience Level</label>
+                        <select id="experience" name="experience" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#548399] focus:border-[#548399] outline-none" required>
+                            <option value="" disabled selected>Select your experience level</option>
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                            <option value="professional">Professional</option>
+                        </select>
+                    </div>
+                    <div class="col-span-2">
+                        <label for="message" class="block text-gray-700 font-medium mb-2">Additional Information</label>
+                        <textarea id="message" name="message" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#548399] focus:border-[#548399] outline-none"></textarea>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="notifications" class="h-5 w-5 text-[#548399] rounded focus:ring-[#548399]" checked>
+                            <span class="ml-2 text-gray-700">I would like to receive notifications about my enrollment and upcoming events</span>
+                        </label>
+                    </div>
+                    <div class="col-span-2">
+                        <button type="submit" class="bg-[#548399] hover:bg-[#3f6375] text-white font-bold py-3 px-6 rounded-lg transition duration-300 w-full">
+                            Submit Enrollment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testimonials Section -->
+    <div class="py-16 px-4 bg-white">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">What Our Members Say</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="p-6 bg-gray-50 rounded-lg shadow-sm">
+                    <div class="flex items-center mb-4">
+                        <div class="text-yellow-400 flex">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">"The enrollment process was so easy, and I love getting notifications about upcoming events. My son has improved so much since joining the basketball program!"</p>
+                    <div class="flex items-center">
+                        <div class="h-10 w-10 bg-[#548399] rounded-full flex items-center justify-center text-white font-bold mr-3">M</div>
+                        <div>
+                            <h4 class="font-medium text-gray-800">Michael Tanner</h4>
+                            <p class="text-sm text-gray-500">Basketball Program Parent</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 bg-gray-50 rounded-lg shadow-sm">
+                    <div class="flex items-center mb-4">
+                        <div class="text-yellow-400 flex">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">"I've been able to track my progress in the swimming program, and the coaches are excellent. The notification system helps me never miss a session!"</p>
+                    <div class="flex items-center">
+                        <div class="h-10 w-10 bg-[#548399] rounded-full flex items-center justify-center text-white font-bold mr-3">S</div>
+                        <div>
+                            <h4 class="font-medium text-gray-800">Sarah Johnson</h4>
+                            <p class="text-sm text-gray-500">Swimming Program Member</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 bg-gray-50 rounded-lg shadow-sm">
+                    <div class="flex items-center mb-4">
+                        <div class="text-yellow-400 flex">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-half"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">"The football program has been fantastic for my development. I appreciate how easy it is to enroll in new events and stay updated through the platform."</p>
+                    <div class="flex items-center">
+                        <div class="h-10 w-10 bg-[#548399] rounded-full flex items-center justify-center text-white font-bold mr-3">J</div>
+                        <div>
+                            <h4 class="font-medium text-gray-800">James Wilson</h4>
+                            <p class="text-sm text-gray-500">Football Program Member</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div id="contact" class="py-16 px-4 bg-gray-100">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-4">Contact Us</h2>
+            <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+                Have questions? Get in touch with our team and we'll be happy to assist you.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
+                    <div class="bg-[#548399] w-14 h-14 rounded-full flex items-center justify-center mb-4">
+                        <i class="bi bi-geo-alt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Our Location</h3>
+                    <p class="text-gray-600 text-center">123 Sports Avenue, Downtown<br>Metro City, MC 12345</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
+                    <div class="bg-[#548399] w-14 h-14 rounded-full flex items-center justify-center mb-4">
+                        <i class="bi bi-envelope text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Email Us</h3>
+                    <p class="text-gray-600 text-center">info@sportsync.com<br>support@sportsync.com</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
+                    <div class="bg-[#548399] w-14 h-14 rounded-full flex items-center justify-center mb-4">
+                        <i class="bi bi-telephone text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Call Us</h3>
+                    <p class="text-gray-600 text-center">(123) 456-7890<br>(987) 654-3210</p>
+                </div>
+            </div>
+            <div class="mt-12 bg-white p-8 rounded-lg shadow-md">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Send Us a Message</h3>
+                <form id="contact-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="col-span-1">
+                        <label for="contact-name" class="block text-gray-700 font-medium mb-2">Your Name</label>
+                        <input type="text" id="contact-name" name="contact-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#548399] focus:border-[#548399] outline-none" required>
+                    </div>
+                    <div class="col-span-1">
+                        <label for="contact-email" class="block text-gray-700 font-medium mb-2">Email Address</label>
+                        <input type="email" id="contact-email" name="contact-email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#548399] focus:border-[#548399] outline-none" required>
+                    </div>
+                    <div class="col-span-2">
+                        <label for="subject" class="block text-gray-700 font-medium mb-2">Subject</label>
+                        <input type="text" id="subject" name="subject" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#548399] focus:border-[#548399] outline-none" required>
+                    </div>
+                    <div class="col-span-2">
+                        <label for="contact-message" class="block text-gray-700 font-medium mb-2">Your Message</label>
+                        <textarea id="contact-message" name="contact-message" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#548399] focus:border-[#548399] outline-none" required></textarea>
+                    </div>
+                    <div class="col-span-2">
+                        <button type="submit" class="bg-[#548399] hover:bg-[#3f6375] text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                            Send Message
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12 px-4">
+        <div class="container mx-auto max-w-6xl">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <div class="brick-wall h-10 w-10 rounded-lg mr-2"></div>
+                        <span class="font-bold text-xl">SportSync</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        The complete sports management platform for enrollments, notifications, and more.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                            <i class="bi bi-facebook text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                            <i class="bi bi-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                            <i class="bi bi-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                            <i class="bi bi-linkedin text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Home</a></li>
+                        <li><a href="#sports" class="text-gray-400 hover:text-white transition duration-300">Sports</a></li>
+                        <li><a href="#events" class="text-gray-400 hover:text-white transition duration-300">Events</a></li>
+                        <li><a href="#enrollment" class="text-gray-400 hover:text-white transition duration-300">Enrollment</a></li>
+                        <li><a href="#contact" class="text-gray-400 hover:text-white transition duration-300">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-4">Programs</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Basketball</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Swimming</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Football</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Tennis</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Track & Field</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-4">Subscribe</h3>
+                    <p class="text-gray-400 mb-4">
+                        Stay updated with our newsletter for the latest sports programs and events.
+                    </p>
+                    <form class="flex">
+                        <input type="email" placeholder="Your email" class="px-4 py-2 rounded-l-lg w-full focus:outline-none text-gray-800">
+                        <button type="submit" class="bg-[#548399] hover:bg-[#3f6375] px-4 py-2 rounded-r-lg transition duration-300">
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>© 2023 SportSync. All rights reserved. | Privacy Policy | Terms of Service</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Success notification toast -->
+    <div id="success-toast" class="hidden fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50">
+        <div class="flex items-center">
+            <i class="bi bi-check-circle-fill mr-2 text-xl"></i>
+            <span id="toast-message">Enrollment submitted successfully!</span>
+        </div>
+    </div>
+
+    <script>
+        // Original brick wall functionality
+        function createBrickWall() {
+            const container = document.getElementById('brick-animation');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            const rows = 8;
+            const bricksPerRow = Math.floor(container.offsetWidth / 120);
+
+            for (let i = 0; i < rows; i++) {
+                const row = document.createElement('div');
+                row.className = 'row flex w-full';
+                
+                for (let j = 0; j < bricksPerRow; j++) {
+                    const brick = document.createElement('div');
+                    brick.className = 'brick rounded';
+                    row.appendChild(brick);
+                }
+                
+                container.appendChild(row);
+            }
+        }
+
+        // Create the initial brick wall
+        document.addEventListener('DOMContentLoaded', function() {
+            createBrickWall();
+
+            // Mobile menu functionality
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // Notification functionality
+            const notificationBtn = document.getElementById('notificationBtn');
+            const notificationPanel = document.getElementById('notification-panel');
+            const closeNotifications = document.getElementById('close-notifications');
+            
+            if (notificationBtn && notificationPanel && closeNotifications) {
+                notificationBtn.addEventListener('click', function() {
+                    notificationPanel.classList.toggle('hidden');
+                });
+                
+                closeNotifications.addEventListener('click', function() {
+                    notificationPanel.classList.add('hidden');
+                });
+
+                // Close when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!notificationBtn.contains(event.target) && !notificationPanel.contains(event.target)) {
+                        notificationPanel.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Form submission handling
+            const enrollmentForm = document.getElementById('enrollment-form');
+            const contactForm = document.getElementById('contact-form');
+            const successToast = document.getElementById('success-toast');
+            const toastMessage = document.getElementById('toast-message');
+            
+            if (enrollmentForm) {
+                enrollmentForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Simulate form submission
+                    if (toastMessage) toastMessage.textContent = "Enrollment submitted successfully! You'll receive notifications soon.";
+                    if (successToast) {
+                        successToast.classList.remove('hidden');
+                        setTimeout(() => {
+                            successToast.classList.add('hidden');
+                        }, 5000);
+                    }
+                    
+                    // Reset form
+                    enrollmentForm.reset();
+                });
+            }
+            
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Simulate form submission
+                    if (toastMessage) toastMessage.textContent = "Message sent successfully! We'll get back to you soon.";
+                    if (successToast) {
+                        successToast.classList.remove('hidden');
+                        setTimeout(() => {
+                            successToast.classList.add('hidden');
+                        }, 5000);
+                    }
+                    
+                    // Reset form
+                    contactForm.reset();
+                });
+            }
+        });
+
+        // Recreate on window resize
+        window.addEventListener('resize', function() {
+            createBrickWall();
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === "#") return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Close mobile menu if open
+                    const mobileMenu = document.getElementById('mobile-menu');
+                    if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                }
+            });
+        });
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
